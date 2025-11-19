@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!---<link rel="stylesheet" href="styles.css" /> It is for the direct run in Python No Flask --->
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Me – Jacob</title>
+
+</head>
+<body> <!-- This is to display the flash message from main.py --->
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+
+
+  <header>
+    <h1>Hi, I'm Jacob👋</h1>
+    <p></p>
+    <p><img src="{{ url_for('static', filename='images/JACOB.jpg') }}" width="250" height="350" alt="Unable to load"></p>
+
+  </header>
+
+  <section id="about">
+    <h2>About Me</h2>
+    <p>
+      I'm a smart and adaptable student that can find a variety of ways to solve problems.
+    </p>
+    <p>
+      <a href="{{ url_for('details') }}">Details</a>
+    </p>
+  </section>
+
+  <section id="skills">
+    <h2>Skills & Strengths</h2>
+    <ul>
+      <li><a href="{{ url_for('experience') }}">Experience</a></li>
+      <li><a href="{{ url_for('education') }}">Education</a></li>
+      <li>Work In Progress</li>
+      <li>Work In Progress</li>
+    </ul>
+  </section>
+
+  <section id="resume">
+    <h2>Resume</h2>
+    <p><a href="Trung_Resume.pdf" download>Download My Resume</a></p>
+  </section>
+
+  <section id="contact">
+    <h2>Contact Me</h2>
+    <form method="POST" action="/contact">
+      <label for="name">Name:</label><br />
+      <input type="text" id="name" name="name" placeholder="Your name" required minlength="2" /><br />
+      <label for="email">Email:</label><br />
+      <input type="email" id="email" name="email" placeholder="Your email" required /><br />
+      <label for="message">Message:</label><br />
+      <textarea id="message" name="message" required minlength="10"></textarea><br />
+      <input type="submit" value="Send" />
+
+    </form>
+  </section>
+
+  <footer>
+    <p>© 2025 Jacob. Built with creativity and care.</p>
+  </footer>
+
+</body>
+</html>
