@@ -1,13 +1,14 @@
 from flask import Flask, render_template, request, redirect, flash
 from flask_mail import Mail, Message
 import secrets
+import logging
+from logging.handlers import RotatingFileHandler
+
+
 
 secure_key = secrets.token_hex(16)
 print(secure_key)
 
-
-import smtplib
-from email.message import EmailMessage
 
 print("Start!")
 
@@ -16,6 +17,12 @@ print("Start!")
 app = Flask(__name__)
 app.secret_key = '7eac3d1bf882df7c7e3a65f43f7c7352'  # Needed for flashing messages
 
+# --- Logging setup (Step 3 snippet) ---
+if not app.debug:  # only log when not in debug mode
+    handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=3)
+    handler.setLevel(logging.ERROR)
+    app.logger.addHandler(handler)
+# --------------------------------------
 
 # Email configuration
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
