@@ -29,7 +29,7 @@ def send_contact_email(user_email, user_message):
 
     payload = {
         "from": {"email": "jacob.ho@jacobho.ca", "name": "Website Contact"},
-        "to": [{"email": "jacob.ho@jacobho.ca"}],
+        "to": [{"email": "jacobpython1583@gmail.com"}],
         "subject": "New contact form submission",
         "text": f"Message from {user_email}:\n\n{user_message}",
         "html": f"<p><strong>Message from {user_email}:</strong></p><p>{user_message}</p>",
