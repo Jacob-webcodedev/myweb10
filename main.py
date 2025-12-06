@@ -12,7 +12,7 @@ def check_api_key():
     else:
         raise ValueError("MAILERSEND_API_KEY not found in environment variables")
 
-def send_test_email():
+def send_contact_email(user_email, user_message):
     url = "https://api.mailersend.com/v1/email"
 
     headers = {
@@ -21,27 +21,16 @@ def send_test_email():
     }
 
     payload = {
-        "from": {
-            "email": "jacob.ho@jacobho.ca",
-            "name": "Contact Form"
-        },
-        "to": [
-            {
-                "email": "jacobpython1583@gmail.com",
-                "name": "Jacob Ho"
-            }
-        ],
-        "subject": "Test email using raw API",
-        "text": "This is a plain text test email.",
-        "html": "<p>This is a <strong>HTML</strong> test email.</p>"
+        "from": {"email": "jacob.ho@jacobho.ca", "name": "Website Contact"},
+        "to": [{"email": "jacobpython1583@gmail.com"}],
+        "subject": "New contact form submission",
+        "text": f"Message from {user_email}:\n\n{user_message}",
+        "html": f"<p><strong>Message from {user_email}:</strong></p><p>{user_message}</p>",
+        "reply_to": [{"email": user_email}]
     }
 
     response = requests.post(url, headers=headers, json=payload)
-    print("status:", response.status_code)
-    print("response:", response.text)
-
-def send_contact_email(user_email, user_message):
-    url = "https://api.mailersend.com/v1/email"
+    return response.status_code == 202  # 202 Accepted = queued successfully
 
 @app.route('/')
 def index():
