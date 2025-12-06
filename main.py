@@ -1,37 +1,34 @@
-from flask import Flask, render_template, request, redirect, flash
+import os
+import requests
+from flask import Flask, render_template, request, flash, redirect, url_for
 from flask_mail import Mail, Message
-import secrets
-import logging
-from logging.handlers import RotatingFileHandler
-
-
-
-secure_key = secrets.token_hex(16)
-print(secure_key)
-
-
-print("Start!")
-
-
 
 app = Flask(__name__)
-app.secret_key = '7eac3d1bf882df7c7e3a65f43f7c7352'  # Needed for flashing messages
+app.secret_key = os.getenv("FLASK_SECRET_KEY")  # Needed for flash messages
 
-# --- Logging setup (Step 3 snippet) ---
-if not app.debug:  # only log when not in debug mode
-    handler = RotatingFileHandler('error.log', maxBytes=100000, backupCount=3)
-    handler.setLevel(logging.ERROR)
-    app.logger.addHandler(handler)
-# --------------------------------------
-
-# Email configuration
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'jacobpython1583@gmail.com'
-app.config['MAIL_PASSWORD'] = 'sxiw kxdm sgyg iunf'  # Use Gmail App Password
+MAILERSEND_API_KEY = os.getenv("MAILERSEND_API_KEY")
 
 mail = Mail(app)
+
+def send_contact_email(user_email, user_message):
+    url = "https://api.mailersend.com/v1/email"
+
+    headers = {
+        "Authorization": f"Bearer {MAILERSEND_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    payload = {
+        "from": {"email": "jacob.ho@jacobho.ca", "name": "Website Contact"},
+        "to": [{"email": "jacob.ho@jacobho.ca"}],
+        "subject": "New contact form submission",
+        "text": f"Message from {user_email}:\n\n{user_message}",
+        "html": f"<p><strong>Message from {user_email}:</strong></p><p>{user_message}</p>",
+        "reply_to": [{"email": user_email}]
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    return response.status_code == 202  # 202 Accepted = queued successfully
 
 @app.route('/')
 def index():
@@ -51,25 +48,18 @@ def details():
 
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
-    if request.method == 'POST':
-        name = request.form['name']
-        email = request.form.get('email')
-        message = request.form['message']
+    if request.method == "POST":
+        user_email = request.form.get("email")
+        user_message = request.form.get("message")
 
-        try:
-            msg = Message(subject=f'New message from {name}',
-                          sender=email,
-                          recipients=['jacobpython1583@gmail.com'],
-                          body=f"{email} has sent you this: \n {message}")
-            mail.send(msg)
-            flash(f'Message sent successfully by {email}')
-        except Exception as e:
-            print("Email failed:", e)
-            flash('Failed to send message.')
-        return redirect('/')
+        if send_contact_email(user_email, user_message):
+            flash("✅ Your message was successfully sent!", "success")
+        else:
+            flash("❌ There was a problem sending your message. Please try again later.", "error")
 
-    return render_template('/')
+        return redirect(url_for("index"))
 
+    return render_template("index.html")
 
 if __name__ == '__main__':
     app.run(debug=True)
