@@ -27,7 +27,7 @@ def send_test_email():
         },
         "to": [
             {
-                "email": "jacob.ho@jacobho.ca",
+                "email": "jacobpython1583@gmail.com",
                 "name": "Jacob Ho"
             }
         ],
