@@ -1,16 +1,18 @@
 import os
 import requests
 from flask import Flask, render_template, request, flash, redirect, url_for
-from flask_mail import Mail, Message
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY")  # Needed for flash messages
 
 MAILERSEND_API_KEY = os.getenv("MAILERSEND_API_KEY")
 
-mail = Mail(app)
+def check_api_key():
+    if MAILERSEND_API_KEY:
+        print("API Key check:", MAILERSEND_API_KEY[:6] + "..." + str(len(MAILERSEND_API_KEY)) + " chars total")
+    else:
+        raise ValueError("MAILERSEND_API_KEY not found in environment variables")
 
-def send_contact_email(user_email, user_message):
+def send_test_email():
     url = "https://api.mailersend.com/v1/email"
 
     headers = {
@@ -19,16 +21,27 @@ def send_contact_email(user_email, user_message):
     }
 
     payload = {
-        "from": {"email": "jacob.ho@jacobho.ca", "name": "Website Contact"},
-        "to": [{"email": "jacob.ho@jacobho.ca"}],
-        "subject": "New contact form submission",
-        "text": f"Message from {user_email}:\n\n{user_message}",
-        "html": f"<p><strong>Message from {user_email}:</strong></p><p>{user_message}</p>",
-        "reply_to": [{"email": user_email}]
+        "from": {
+            "email": "jacob.ho@jacobho.ca",
+            "name": "Contact Form"
+        },
+        "to": [
+            {
+                "email": "jacob.ho@jacobho.ca",
+                "name": "Jacob Ho"
+            }
+        ],
+        "subject": "Test email using raw API",
+        "text": "This is a plain text test email.",
+        "html": "<p>This is a <strong>HTML</strong> test email.</p>"
     }
 
     response = requests.post(url, headers=headers, json=payload)
-    return response.status_code == 202  # 202 Accepted = queued successfully
+    print("status:", response.status_code)
+    print("response:", response.text)
+
+def send_contact_email(user_email, user_message):
+    url = "https://api.mailersend.com/v1/email"
 
 @app.route('/')
 def index():
