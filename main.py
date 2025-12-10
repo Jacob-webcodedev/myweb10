@@ -1,6 +1,8 @@
 import os
 import requests
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, session
+from google_auth_oauthlib.flow import Flow
+
 
 app = Flask(__name__)
 
@@ -77,6 +79,38 @@ def contact():
         return redirect(url_for("index"))
 
     return render_template("index.html")
+
+@app.route("/authorize")
+def authorize():
+    # Step 3 code: start OAuth flow
+    flow = Flow.from_client_secrets_file(
+        "credentials.json",
+        scopes=["https://www.googleapis.com/auth/drive.readonly"],
+        redirect_uri=url_for("oauth2callback", _external=True)
+    )
+    auth_url, state = flow.authorization_url()
+    session["state"] = state
+    return redirect(auth_url)
+
+@app.route("/oauth2callback")
+def oauth2callback():
+    # Step 3 code: handle callback
+    flow = Flow.from_client_secrets_file(
+        "credentials.json",
+        scopes=["https://www.googleapis.com/auth/drive.readonly"],
+        redirect_uri=url_for("oauth2callback", _external=True)
+    )
+    flow.fetch_token(authorization_response=request.url)
+    creds = flow.credentials
+    session["credentials"] = {
+        "token": creds.token,
+        "refresh_token": creds.refresh_token,
+        "token_uri": creds.token_uri,
+        "client_id": creds.client_id,
+        "client_secret": creds.client_secret,
+        "scopes": creds.scopes
+    }
+    return "Authorization complete!"
 
 
 if __name__ == '__main__':
