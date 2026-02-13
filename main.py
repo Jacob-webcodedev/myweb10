@@ -10,28 +10,28 @@ app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 # MailerSend API key from environment
-MAILERSEND_API_KEY = os.getenv("MAILERSEND_API_KEY")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
 
 
 def check_api_key():
     """Quick sanity check for API key presence."""
-    if MAILERSEND_API_KEY:
-        print("API Key check:", MAILERSEND_API_KEY[:6] + "..." + str(len(MAILERSEND_API_KEY)) + " chars total")
+    if RESEND_API_KEY:
+        print("API Key check:", RESEND_API_KEY[:6] + "..." + str(len(RESEND_API_KEY)) + " chars total")
     else:
-        raise ValueError("MAILERSEND_API_KEY not found in environment variables")
+        raise ValueError("RESEND_API_KEY not found in environment variables")
 
 def send_contact_email(user_email, user_message):
-    """Send contact form submission via MailerSend API."""
-    url = "https://api.mailersend.com/v1/email"
+    """Send contact form submission via Resend API."""
+    url = "https://api.resend.com/emails"
 
     headers = {
-        "Authorization": f"Bearer {MAILERSEND_API_KEY}",
+        "Authorization": f"Bearer {RESEND_API_KEY}",
         "Content-Type": "application/json"
     }
 
     payload = {
         "from": {"email": "jacob.ho@jacobho.ca", "name": "Website Contact"},
-        "to": [{"email": "jacobpython1583@gmail.com"}],
+        "to": [{"email": "jacobho1583@gmail.com"}],
         "subject": "New contact form submission",
         "text": f"Message from {user_email}:\n\n{user_message}",
         "html": f"<p><strong>Message from {user_email}:</strong></p><p>{user_message}</p>",
