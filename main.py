@@ -1,16 +1,16 @@
 import os
-import requests
 from flask import Flask, render_template, request, flash, redirect, url_for, session
 from google_auth_oauthlib.flow import Flow
-
+import resend
 
 app = Flask(__name__)
 
 # Secret key for flash messages
 app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
-# MailerSend API key from environment
+# Resend API key from environment
 RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+resend.api_key = RESEND_API_KEY
 
 
 def check_api_key():
@@ -22,27 +22,27 @@ def check_api_key():
 
 def send_contact_email(user_email, user_message):
     """Send contact form submission via Resend API."""
-    url = "https://api.resend.com/emails"
-
-    headers = {
-        "Authorization": f"Bearer {RESEND_API_KEY}",
-        "Content-Type": "application/json"
-    }
 
     payload = {
-        "from": {"email": "jacob.ho@jacobho.ca", "name": "Website Contact"},
-        "to": [{"email": "jacobho1583@gmail.com"}],
+        "from": "Website Contact <jacob.ho@jacobho.ca>",
+        "to": ["jacobho1583@gmail.com"],
         "subject": "New contact form submission",
         "text": f"Message from {user_email}:\n\n{user_message}",
         "html": f"<p><strong>Message from {user_email}:</strong></p><p>{user_message}</p>",
-        "reply_to": [{"email": user_email}]
+        "reply_to": [user_email] if user_email else None,
     }
 
-    response = requests.post(url, headers=headers, json=payload)
-    print("status:", response.status_code)
-    print("response:", response.text)
+    if payload["reply_to"] is None:
+        del payload["reply_to"]
 
-    return response.status_code == 202  # 202 Accepted = queued successfully
+    try:
+        response = resend.Emails.send(payload)
+        print("Resend response:", response)
+        # If no exception, consider it successful
+        return True
+    except Exception as e:
+        print("Error sending email via Resend:", e)
+        return False
 
 
 @app.route('/')
