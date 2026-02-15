@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-resend.api_key = "re_LZ2hUoNQ_KeTNan7Bo7h8LuX7aRMRvvxi"
+resend.api_key = os.environ["RESEND_API_KEY"]
 
 response = resend.Emails.send({
     "from": "Jacob Ho <jacob.ho@jacobho.ca>",
